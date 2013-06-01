@@ -31,6 +31,4 @@ function station($bikesystemname) {
 	echo json_encode($stations);
 }
 
-
-
 ?>
