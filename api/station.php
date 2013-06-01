@@ -17,18 +17,38 @@ function bikesystem() {
 */
 $app->get('/api/system/:bikesystem/station','station')->name('bikesystemname');
 function station($bikesystemname) {
-	$station_query = $station_collection->find();
-	
-	$stations=array();
-	foreach ($station_query as $obj) {
-		$lat=$obj['lat']/1000000;
-		$lng=$obj['lng']/1000000;
-		$ocupation=$obj['free']*100/($obj['bikes']+$obj['free']);
-		$marker=array($lat,$lng,$ocupation);
-		array_push($stations,json_encode($marker));
-	}
-	
-	echo json_encode($stations);
+try {
+  // open connection to MongoDB server
+  $conn = new Mongo('localhost');
+
+  // access database
+  $db = $conn->bicing;
+
+  // access collection
+  $collection = $db->station;
+
+  // execute query
+  // retrieve all documents
+  $cursor = $collection->find()->limit(400);
+
+  // iterate through the result set
+  // print each document
+  $stations=array();
+  foreach ($cursor as $obj) {
+        $station_info=array($obj['id'],$obj['cleaname'],$obj['location']);
+	array_push($stations,json_encode($station_info));
+  }
+  echo json_encode($stations);
+
+  // disconnect from server
+  $conn->close();
+} catch (MongoConnectionException $e) {
+  die('Error connecting to MongoDB server');
+} catch (MongoException $e) {
+  die('Error: ' . $e->getMessage());
 }
+
+}
+
 
 ?>
