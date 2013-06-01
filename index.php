@@ -15,6 +15,8 @@ try {
 	$data_collection = $db->data;
 	$station_collection = $db->station;
 
+	$app = new Slim();
+		
 /*
  *  Station resource
  */
