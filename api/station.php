@@ -7,7 +7,7 @@
 */
 $app->get('/api/system/','bikesystem');
 function bikesystem() {
-    echo "Get all bike systems recorderd. TO-DO";
+	echo "Get all bike systems recorderd. TO-DO";
 }
 
 /*
@@ -17,7 +17,18 @@ function bikesystem() {
 */
 $app->get('/api/system/:bikesystem/station','station')->name('bikesystemname');
 function station($bikesystemname) {
-    echo "Get all stations from $bikesystemname bike system. TO-DO";
+	$station_query = $station_collection->find();
+	
+	$stations=array();
+	foreach ($station_query as $obj) {
+		$lat=$obj['lat']/1000000;
+		$lng=$obj['lng']/1000000;
+		$ocupation=$obj['free']*100/($obj['bikes']+$obj['free']);
+		$marker=array($lat,$lng,$ocupation);
+		array_push($stations,json_encode($marker));
+	}
+	
+	echo json_encode($stations);
 }
 
 
