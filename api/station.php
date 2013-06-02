@@ -72,6 +72,40 @@ function near($bikesystemname,$lat,$lon,$results) {
 }
 
 /*
+ * /api/system/{system-name}/station/{station-id1}/distance/{station-id2}
+* i.e: http:///bdc.labobila.com/api/system/bicing/station/400/distance/127
+* Get distance in meters from {station-id1} to {station-id2}
+*/
+$app->get('/api/system/:bikesystem/station/:idstation1/distance/:idstation2','stationdistance')->name('bikesystemname','idstation1','idstation2');
+function stationdistance($bikesystemname,$idstation1,$idstation2) {
+	try {
+
+		$conn = new Mongo(DB_SERVER_IP);
+		$db = $conn->$bikesystemname;
+		$collection = $db->station;
+		$collectionQuery=array('id'=> array($idstation1, $idstation2));
+		$cursor = $collection->find($collectionQuery)->limit(2);
+		
+		$locations=array();
+		foreach ($cursor as $obj) {
+			array_push($locations,array((float)$obj['lat'],(float)$obj['lon']));
+		}
+		
+		echo $locations[0]['lat'];
+		echo $locations[0]['lon'];
+		echo $locations[1]['lat'];
+		echo $locations[1]['lon'];
+
+		// disconnect from server
+		$conn->close();
+	} catch (MongoConnectionException $e) {
+		die('Error connecting to MongoDB server');
+	} catch (MongoException $e) {
+		die('Error: ' . $e->getMessage());
+	}
+}
+
+/*
  * /api/system/{system-name}/station/{station-id}/within/{x-meters}/{num-results}
 * i.e: http:///bdc.labobila.com/api/system/bicing/station/400/within/500/3
 * Get {num-result} stations near to provided {station-id}
@@ -96,7 +130,7 @@ function stationswithin($bikesystemname,$idstation,$meters,$results) {
 				'geoNear' => "station",      					// Search in the station collection
 				'near' => $location,            				// Search near $location
 				'spherical' => false,        					// Disable spherical search
-				'maxDistance' => float(int($meters/111120)),	// 1 degree ~ 111.12 km
+				'maxDistance' => (float)((int)$meters/111120),	// 1 degree ~ 111.12 km
 				'num' => (int)$results,         				// Maximum returned documents
 		));
 		echo json_encode($nearbystations);
