@@ -55,10 +55,10 @@ function near($bikesystemname,$lat,$lon,$results) {
 		$location = array((float)$lon,(float)$lat);
 
 		$station = $db->command(array(
-				'geoNear' => "station",      // Search in the poiConcat collection
-				'near' => $location, // Search near 51.48°N, 0.08°E
-				'spherical' => false,           // Enable spherical search
-				'num' => $results,                    // Maximum 5 returned documents
+				'geoNear' => "station",      	// Search in the station collection
+				'near' => $location, 			// Search near $location
+				'spherical' => false,           // Disable spherical search
+				'num' => (int)$results,         // Maximum $results returned documents
 		));
 		echo json_encode($station);
 
