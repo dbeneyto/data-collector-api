@@ -1,5 +1,16 @@
 <?
 
+function distanceBetweenPoints($latitude1, $longitude1, $latitude2, $longitude2) {
+	$theta = $longitude1 - $longitude2;
+	$miles = (sin(deg2rad($latitude1)) * sin(deg2rad($latitude2))) + (cos(deg2rad($latitude1)) * cos(deg2rad($latitude2)) * cos(deg2rad($theta)));
+	$miles = acos($miles);
+	$miles = rad2deg($miles);
+	$miles = $miles * 60 * 1.1515;
+	$kilometers = $miles * 1.609344;
+	$meters = $kilometers * 1000;
+	return $meters;
+}
+
 /*
  * /api/system
 * i.e: http:///bdc.labobila.com/api/system
@@ -83,19 +94,16 @@ function stationdistance($bikesystemname,$idstation1,$idstation2) {
 		$conn = new Mongo(DB_SERVER_IP);
 		$db = $conn->$bikesystemname;
 		$collection = $db->station;
-		$collectionQuery=array('id'=> array($idstation1, $idstation2));
+		$collectionQuery=array('id'=> array( '$in' => array($idstation1, $idstation2)));
 		$cursor = $collection->find($collectionQuery)->limit(2);
 		
 		$locations=array();
 		foreach ($cursor as $obj) {
-			array_push($locations,array((float)$obj['lat'],(float)$obj['lon']));
+			array_push($locations,$obj['location']);
 		}
 		
-		echo $locations[0]['lat'];
-		echo $locations[0]['lon'];
-		echo $locations[1]['lat'];
-		echo $locations[1]['lon'];
-
+		echo distanceBetweenPoints($locations[0]['lat'],$locations[0]['lon'],$locations[1]['lat'],$locations[1]['lon']);
+		
 		// disconnect from server
 		$conn->close();
 	} catch (MongoConnectionException $e) {
